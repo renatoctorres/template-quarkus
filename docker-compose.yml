@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  template-quarkus:
+    image: openjdk:21-jdk-slim
+    build:
+      context: .
+      dockerfile: src/main/docker/Dockerfile.jvm
+    environment:
+      JAVA_OPTIONS: "-Djava.net.preferIPv4Stack=true"
+      DYNAMODB_ENDPOINT: http://dynamodb-local:8000
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+#    command: gradle quarkusDev --no-daemon
+    ports:
+      - "8080:8080"
+    depends_on:
+      - dynamodb-local
+
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+
+volumes:
+  dynamodb_data:
